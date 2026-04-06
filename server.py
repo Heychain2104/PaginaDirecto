@@ -1,14 +1,11 @@
 import asyncio
 import websockets
 import pytchat
+import os
 
-# 🔥 PON AQUÍ TU ID DE DIRECTO
 VIDEO_ID = "wFfFJMOuhyQ"
 
-# Crear conexión al chat de YouTube
 chat = pytchat.create(video_id=VIDEO_ID)
-
-# Lista de clientes conectados (tu web)
 clients = set()
 
 async def handler(websocket):
@@ -27,15 +24,15 @@ async def send_chat():
             message = f"{c.author.name}:{c.message}"
             print(message)
 
-            # Enviar mensaje a todos los clientes conectados
             if clients:
                 await asyncio.gather(*[client.send(message) for client in clients])
 
         await asyncio.sleep(0.1)
 
 async def main():
-    server = await websockets.serve(handler, "localhost", 6789)
-    print("Servidor iniciado en ws://localhost:6789")
+    PORT = int(os.environ.get("PORT", 10000))
+    server = await websockets.serve(handler, "0.0.0.0", PORT)
+    print(f"Servidor en puerto {PORT}")
 
     await asyncio.gather(
         server.wait_closed(),
